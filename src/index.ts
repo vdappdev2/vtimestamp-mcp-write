@@ -12,7 +12,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { getConfig } from './verus-rpc.js';
 import { registerTools } from './tools.js';
 
-// Validate required env vars before starting
+// Validate config before starting
 try {
   const cfg = getConfig();
 
@@ -30,16 +30,14 @@ try {
   );
 } catch (err) {
   process.stderr.write(
-    `vtimestamp-mcp-write: ${err instanceof Error ? err.message : 'Configuration error'}\n` +
-      'Required: VERUS_RPC_URL (e.g., http://127.0.0.1:27486)\n' +
-      'Optional: VERUS_RPC_USER, VERUS_RPC_PASSWORD, VERUS_NETWORK\n'
+    `vtimestamp-mcp-write: ${err instanceof Error ? err.message : 'Configuration error'}\n`
   );
   process.exit(1);
 }
 
 const server = new McpServer({
   name: 'vtimestamp-mcp-write',
-  version: '1.0.0',
+  version: '1.1.0',
 });
 
 registerTools(server);

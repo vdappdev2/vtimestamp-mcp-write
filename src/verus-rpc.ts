@@ -3,14 +3,63 @@
  *
  * Single-endpoint JSON-RPC 1.0 client with optional Basic auth.
  * Connects to a user's Verus daemon for wallet operations.
+ *
+ * Auto-detects RPC credentials from VRSC.conf when possible.
+ * Env vars override auto-detected values for remote daemon use.
  */
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { homedir, platform } from 'node:os';
 import type {
   Network,
   GetIdentityResponse,
   IdentityHistoryResponse,
   ContentMultiMap,
 } from './types.js';
+
+// ============================================================================
+// VRSC.conf Auto-Detection
+// ============================================================================
+
+function getDefaultConfPath(): string {
+  const home = homedir();
+  switch (platform()) {
+    case 'darwin':
+      return join(home, 'Library', 'Application Support', 'Komodo', 'VRSC', 'VRSC.conf');
+    case 'win32':
+      return join(process.env.APPDATA || join(home, 'AppData', 'Roaming'), 'Komodo', 'VRSC', 'VRSC.conf');
+    default:
+      return join(home, '.komodo', 'VRSC', 'VRSC.conf');
+  }
+}
+
+interface ConfValues {
+  rpcuser?: string;
+  rpcpassword?: string;
+  rpcport?: string;
+}
+
+function parseVrscConf(confPath: string): ConfValues | null {
+  try {
+    const content = readFileSync(confPath, 'utf-8');
+    const values: ConfValues = {};
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eqIndex = trimmed.indexOf('=');
+      if (eqIndex === -1) continue;
+      const key = trimmed.slice(0, eqIndex).trim();
+      const value = trimmed.slice(eqIndex + 1).trim();
+      if (key === 'rpcuser') values.rpcuser = value;
+      else if (key === 'rpcpassword') values.rpcpassword = value;
+      else if (key === 'rpcport') values.rpcport = value;
+    }
+    return values;
+  } catch {
+    return null;
+  }
+}
 
 // ============================================================================
 // Configuration
@@ -28,22 +77,31 @@ let config: RpcConfig | null = null;
 export function getConfig(): RpcConfig {
   if (config) return config;
 
-  const url = process.env.VERUS_RPC_URL;
-  if (!url) {
-    throw new Error('VERUS_RPC_URL environment variable is required');
-  }
-
   const networkEnv = process.env.VERUS_NETWORK?.toLowerCase();
   const network: Network =
     networkEnv === 'testnet' ? 'testnet' : 'mainnet';
 
-  config = {
-    url,
-    user: process.env.VERUS_RPC_USER || undefined,
-    password: process.env.VERUS_RPC_PASSWORD || undefined,
-    network,
-  };
+  // Try auto-detect from VRSC.conf
+  const confPath = process.env.VERUS_CONF_PATH || getDefaultConfPath();
+  const conf = parseVrscConf(confPath);
 
+  const user = process.env.VERUS_RPC_USER || conf?.rpcuser || undefined;
+  const password = process.env.VERUS_RPC_PASSWORD || conf?.rpcpassword || undefined;
+
+  // URL: env var > build from conf rpcport > default port
+  const defaultPort = network === 'testnet' ? '18843' : '27486';
+  const url = process.env.VERUS_RPC_URL
+    || `http://127.0.0.1:${conf?.rpcport || defaultPort}`;
+
+  if (!user || !password) {
+    throw new Error(
+      `Could not find RPC credentials. Looked for VRSC.conf at: ${confPath}\n` +
+      'Either ensure your Verus daemon is installed, set VERUS_CONF_PATH, ' +
+      'or provide VERUS_RPC_URL, VERUS_RPC_USER, and VERUS_RPC_PASSWORD.'
+    );
+  }
+
+  config = { url, user, password, network };
   return config;
 }
 

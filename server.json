@@ -6,43 +6,50 @@
     "url": "https://github.com/vdappdev2/vtimestamp-mcp-write",
     "source": "github"
   },
-  "version": "1.0.0",
+  "version": "1.1.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "vtimestamp-mcp-write",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
-        {
-          "description": "Verus daemon RPC URL (e.g., http://127.0.0.1:27486)",
-          "isRequired": true,
-          "format": "string",
-          "isSecret": false,
-          "name": "VERUS_RPC_URL"
-        },
-        {
-          "description": "RPC username from VRSC.conf",
-          "isRequired": false,
-          "format": "string",
-          "isSecret": true,
-          "name": "VERUS_RPC_USER"
-        },
-        {
-          "description": "RPC password from VRSC.conf",
-          "isRequired": false,
-          "format": "string",
-          "isSecret": true,
-          "name": "VERUS_RPC_PASSWORD"
-        },
         {
           "description": "Network: mainnet (default) or testnet",
           "isRequired": false,
           "format": "string",
           "isSecret": false,
           "name": "VERUS_NETWORK"
+        },
+        {
+          "description": "Path to VRSC.conf (auto-detected by default)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "VERUS_CONF_PATH"
+        },
+        {
+          "description": "Override: Verus daemon RPC URL (for remote daemons)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "VERUS_RPC_URL"
+        },
+        {
+          "description": "Override: RPC username (for remote daemons)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true,
+          "name": "VERUS_RPC_USER"
+        },
+        {
+          "description": "Override: RPC password (for remote daemons)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true,
+          "name": "VERUS_RPC_PASSWORD"
         }
       ]
     }

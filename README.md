@@ -24,55 +24,13 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "vtimestamp-write": {
       "command": "npx",
-      "args": ["-y", "vtimestamp-mcp-write"],
-      "env": {
-        "VERUS_RPC_URL": "http://127.0.0.1:27486",
-        "VERUS_RPC_USER": "your_rpc_user",
-        "VERUS_RPC_PASSWORD": "your_rpc_password",
-        "VERUS_NETWORK": "mainnet"
-      }
+      "args": ["-y", "vtimestamp-mcp-write"]
     }
   }
 }
 ```
 
-Using yarn:
-
-```json
-{
-  "mcpServers": {
-    "vtimestamp-write": {
-      "command": "yarn",
-      "args": ["dlx", "vtimestamp-mcp-write"],
-      "env": {
-        "VERUS_RPC_URL": "http://127.0.0.1:27486",
-        "VERUS_RPC_USER": "your_rpc_user",
-        "VERUS_RPC_PASSWORD": "your_rpc_password",
-        "VERUS_NETWORK": "mainnet"
-      }
-    }
-  }
-}
-```
-
-Using pnpm:
-
-```json
-{
-  "mcpServers": {
-    "vtimestamp-write": {
-      "command": "pnpm",
-      "args": ["dlx", "vtimestamp-mcp-write"],
-      "env": {
-        "VERUS_RPC_URL": "http://127.0.0.1:27486",
-        "VERUS_RPC_USER": "your_rpc_user",
-        "VERUS_RPC_PASSWORD": "your_rpc_password",
-        "VERUS_NETWORK": "mainnet"
-      }
-    }
-  }
-}
-```
+That's it — the server auto-detects your RPC credentials from `VRSC.conf` (see [Configuration](#configuration) below).
 
 ### VS Code
 
@@ -84,48 +42,57 @@ Add to your VS Code MCP settings:
     "servers": {
       "vtimestamp-write": {
         "command": "npx",
-        "args": ["-y", "vtimestamp-mcp-write"],
-        "env": {
-          "VERUS_RPC_URL": "http://127.0.0.1:27486",
-          "VERUS_RPC_USER": "your_rpc_user",
-          "VERUS_RPC_PASSWORD": "your_rpc_password",
-          "VERUS_NETWORK": "mainnet"
-        }
+        "args": ["-y", "vtimestamp-mcp-write"]
       }
     }
   }
 }
 ```
 
-## Environment Variables
+## Configuration
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `VERUS_RPC_URL` | Yes | Daemon RPC URL (e.g., `http://127.0.0.1:27486`) |
-| `VERUS_RPC_USER` | No | RPC username (from `VRSC.conf`) |
-| `VERUS_RPC_PASSWORD` | No | RPC password (from `VRSC.conf`) |
-| `VERUS_NETWORK` | No | `mainnet` (default) or `testnet` |
+The server automatically reads RPC credentials from your local `VRSC.conf` file. No manual configuration is needed for most users.
 
-**Finding your RPC credentials:** Check your `VRSC.conf` file for `rpcuser` and `rpcpassword`. On macOS: `~/Library/Application Support/Komodo/VRSC/VRSC.conf`. On Linux: `~/.komodo/VRSC/VRSC.conf`.
+**Auto-detected `VRSC.conf` paths:**
+- **macOS:** `~/Library/Application Support/Komodo/VRSC/VRSC.conf`
+- **Linux:** `~/.komodo/VRSC/VRSC.conf`
+- **Windows:** `%AppData%\Roaming\Komodo\VRSC\VRSC.conf`
+
+### Environment Variables
+
+All optional — only needed for non-standard setups or remote daemons.
+
+| Variable | Description |
+|----------|-------------|
+| `VERUS_NETWORK` | `mainnet` (default) or `testnet` |
+| `VERUS_CONF_PATH` | Custom path to `VRSC.conf` |
+| `VERUS_RPC_URL` | Override: daemon RPC URL (for remote daemons) |
+| `VERUS_RPC_USER` | Override: RPC username (for remote daemons) |
+| `VERUS_RPC_PASSWORD` | Override: RPC password (for remote daemons) |
 
 ## Tools
 
 ### `vtimestamp_create`
 
-Create a new timestamp on a VerusID.
+Create a new timestamp on a VerusID. Provide either a file path or text — the server computes the SHA-256 hash automatically.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `identity` | string | Yes | VerusID name (e.g., `alice@`) |
-| `hash` | string | Yes | SHA-256 hash (64-character hex string) |
+| `file_path` | string | One of | Path to a file to hash and timestamp |
+| `text` | string | One of | Text to hash and timestamp (e.g., an attestation or report) |
 | `title` | string | Yes | Title for the timestamp |
-| `description` | string | No | Description of the document |
-| `filename` | string | No | Original filename |
-| `filesize` | number | No | File size in bytes |
+| `description` | string | No | Description of the content |
+| `filename` | string | No | Original filename (auto-detected when using `file_path`) |
+| `filesize` | number | No | File size in bytes (auto-detected when using `file_path`) |
 | `sourceoffunds` | string | No | Funding address (R-address, z-address, or ID@) |
 | `feeoffer` | number | No | Fee offer in VRSC (default: 0.0001) |
 
-**Example prompt:** "Timestamp my Q4 report on alice@. The SHA-256 hash is a7f3b2c1..."
+Either `file_path` or `text` must be provided (mutually exclusive).
+
+**Example prompts:**
+- "Timestamp the file at /path/to/report.pdf on alice@"
+- "Timestamp this text on alice@: I attest that invoice #4521 was approved"
 
 **Success response:**
 ```json
@@ -141,9 +108,9 @@ Create a new timestamp on a VerusID.
 ```
 
 **Error cases:**
-- Invalid hash format → `InvalidParams` error
 - Identity not found → error with identity name
 - Duplicate hash → error with existing block height and txid
+- File not found → `InvalidParams` error
 - RPC failure → error with daemon message
 
 ## How It Works
@@ -167,12 +134,7 @@ Your Verus Daemon (verusd)
 
 ### Local daemon
 
-The simplest setup — `verusd` runs on the same machine as the MCP server.
-
-- **Mainnet:** `VERUS_RPC_URL=http://127.0.0.1:27486`
-- **Testnet:** `VERUS_RPC_URL=http://127.0.0.1:18843`
-
-No extra daemon configuration needed — `verusd` accepts localhost connections by default.
+The simplest setup — `verusd` runs on the same machine as the MCP server. No configuration needed — credentials are auto-detected from `VRSC.conf`.
 
 ### Remote daemon (VPS)
 
@@ -181,7 +143,7 @@ You can point the MCP server at a `verusd` instance running on another machine (
 1. **Allow your IP:** Add `rpcallowip=<your-ip>` (the daemon only accepts localhost by default)
 2. **Open the port:** Ensure the RPC port (27486 mainnet, 18843 testnet) is reachable through any firewalls
 
-Then configure your MCP env vars with the remote daemon's URL and credentials (see Installation above).
+Then set the env var overrides (`VERUS_RPC_URL`, `VERUS_RPC_USER`, `VERUS_RPC_PASSWORD`) in your MCP config.
 
 **Important:** RPC credentials are sent over plain HTTP. If connecting over the open internet (not a local network), use an SSH tunnel to secure the connection:
 
@@ -193,9 +155,9 @@ Then use `VERUS_RPC_URL=http://127.0.0.1:27486` as if it were local — the tunn
 
 ## Security Notes
 
+- This server **reads your `VRSC.conf`** to auto-detect RPC credentials — no secrets are copied or stored elsewhere
 - This server performs **on-chain writes** that cost a small transaction fee (default 0.0001 VRSC)
-- Keep your RPC credentials secure — do not share your `VRSC.conf` values
-- The server only connects to the daemon URL you configure — no data is sent elsewhere
+- The server only connects to your local daemon (or the URL you configure) — no data is sent elsewhere
 - If connecting to a remote daemon, use an SSH tunnel rather than exposing the RPC port directly
 - Consider running on **testnet** first to verify your setup
 - The `sourceoffunds` parameter can be used to control which address pays fees
