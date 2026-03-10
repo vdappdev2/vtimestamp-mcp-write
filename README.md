@@ -15,6 +15,12 @@ Enables AI agents (Claude Desktop, VS Code, etc.) to create document timestamps 
 
 ## Installation
 
+### Claude Code
+
+```bash
+claude mcp add --transport stdio --scope user vtimestamp-write -- npx vtimestamp-mcp-write@latest
+```
+
 ### Claude Desktop
 
 Add to your `claude_desktop_config.json`:
@@ -24,7 +30,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "vtimestamp-write": {
       "command": "npx",
-      "args": ["-y", "vtimestamp-mcp-write"]
+      "args": ["-y", "vtimestamp-mcp-write@latest"]
     }
   }
 }
@@ -42,7 +48,7 @@ Add to your VS Code MCP settings:
     "servers": {
       "vtimestamp-write": {
         "command": "npx",
-        "args": ["-y", "vtimestamp-mcp-write"]
+        "args": ["-y", "vtimestamp-mcp-write@latest"]
       }
     }
   }
