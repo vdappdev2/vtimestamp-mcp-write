@@ -86,4 +86,3 @@ export interface CreateTimestampInput {
   filesize?: number;
 }
 
-export type Network = 'mainnet' | 'testnet';

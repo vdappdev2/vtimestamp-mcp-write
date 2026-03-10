@@ -12,7 +12,6 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir, platform } from 'node:os';
 import type {
-  Network,
   GetIdentityResponse,
   IdentityHistoryResponse,
   ContentMultiMap,
@@ -69,17 +68,12 @@ interface RpcConfig {
   url: string;
   user?: string;
   password?: string;
-  network: Network;
 }
 
 let config: RpcConfig | null = null;
 
 export function getConfig(): RpcConfig {
   if (config) return config;
-
-  const networkEnv = process.env.VERUS_NETWORK?.toLowerCase();
-  const network: Network =
-    networkEnv === 'testnet' ? 'testnet' : 'mainnet';
 
   // Try auto-detect from VRSC.conf
   const confPath = process.env.VERUS_CONF_PATH || getDefaultConfPath();
@@ -88,10 +82,9 @@ export function getConfig(): RpcConfig {
   const user = process.env.VERUS_RPC_USER || conf?.rpcuser || undefined;
   const password = process.env.VERUS_RPC_PASSWORD || conf?.rpcpassword || undefined;
 
-  // URL: env var > build from conf rpcport > default port
-  const defaultPort = network === 'testnet' ? '18843' : '27486';
+  // URL: env var > build from conf rpcport > default port (27486)
   const url = process.env.VERUS_RPC_URL
-    || `http://127.0.0.1:${conf?.rpcport || defaultPort}`;
+    || `http://127.0.0.1:${conf?.rpcport || '27486'}`;
 
   if (!user || !password) {
     throw new Error(
@@ -101,7 +94,7 @@ export function getConfig(): RpcConfig {
     );
   }
 
-  config = { url, user, password, network };
+  config = { url, user, password };
   return config;
 }
 

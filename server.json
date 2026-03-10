@@ -6,23 +6,16 @@
     "url": "https://github.com/vdappdev2/vtimestamp-mcp-write",
     "source": "github"
   },
-  "version": "1.1.0",
+  "version": "1.1.1",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "vtimestamp-mcp-write",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
-        {
-          "description": "Network: mainnet (default) or testnet",
-          "isRequired": false,
-          "format": "string",
-          "isSecret": false,
-          "name": "VERUS_NETWORK"
-        },
         {
           "description": "Path to VRSC.conf (auto-detected by default)",
           "isRequired": false,

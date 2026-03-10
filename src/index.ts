@@ -26,7 +26,7 @@ try {
   }
 
   process.stderr.write(
-    `vtimestamp-mcp-write: connecting to ${maskedUrl} (${cfg.network})\n`
+    `vtimestamp-mcp-write: connecting to ${maskedUrl}\n`
   );
 } catch (err) {
   process.stderr.write(
@@ -37,7 +37,7 @@ try {
 
 const server = new McpServer({
   name: 'vtimestamp-mcp-write',
-  version: '1.1.0',
+  version: '1.1.1',
 });
 
 registerTools(server);

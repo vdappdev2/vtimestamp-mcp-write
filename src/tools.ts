@@ -15,7 +15,6 @@ import {
   getIdentity,
   getIdentityHistory,
   updateIdentity,
-  getConfig,
   VerusRpcError,
   RPC_ERROR_CODES,
 } from './verus-rpc.js';
@@ -88,8 +87,7 @@ export function registerTools(server: McpServer): void {
         hash = sha256(text!);
       }
 
-      const cfg = getConfig();
-      const keys = getVdxfKeys(cfg.network);
+      const keys = getVdxfKeys('mainnet');
 
       try {
         // Step 1: Verify identity exists and get name + parent
@@ -106,7 +104,7 @@ export function registerTools(server: McpServer): void {
                 {
                   type: 'text' as const,
                   text: JSON.stringify({
-                    error: `Identity '${identity}' not found on ${cfg.network}`,
+                    error: `Identity '${identity}' not found`,
                   }),
                 },
               ],
@@ -168,7 +166,6 @@ export function registerTools(server: McpServer): void {
                   hash,
                   title,
                   transaction_id: txid,
-                  network: cfg.network,
                   message: 'Timestamp created successfully',
                 },
                 null,

@@ -64,7 +64,6 @@ All optional — only needed for non-standard setups or remote daemons.
 
 | Variable | Description |
 |----------|-------------|
-| `VERUS_NETWORK` | `mainnet` (default) or `testnet` |
 | `VERUS_CONF_PATH` | Custom path to `VRSC.conf` |
 | `VERUS_RPC_URL` | Override: daemon RPC URL (for remote daemons) |
 | `VERUS_RPC_USER` | Override: RPC username (for remote daemons) |
@@ -102,7 +101,6 @@ Either `file_path` or `text` must be provided (mutually exclusive).
   "hash": "a7f3b2c1...",
   "title": "Q4 Report",
   "transaction_id": "abc123...",
-  "network": "mainnet",
   "message": "Timestamp created successfully"
 }
 ```
@@ -141,7 +139,7 @@ The simplest setup — `verusd` runs on the same machine as the MCP server. No c
 You can point the MCP server at a `verusd` instance running on another machine (e.g., a VPS). The daemon needs two config changes in its `VRSC.conf`:
 
 1. **Allow your IP:** Add `rpcallowip=<your-ip>` (the daemon only accepts localhost by default)
-2. **Open the port:** Ensure the RPC port (27486 mainnet, 18843 testnet) is reachable through any firewalls
+2. **Open the port:** Ensure the RPC port (27486) is reachable through any firewalls
 
 Then set the env var overrides (`VERUS_RPC_URL`, `VERUS_RPC_USER`, `VERUS_RPC_PASSWORD`) in your MCP config.
 
@@ -159,7 +157,6 @@ Then use `VERUS_RPC_URL=http://127.0.0.1:27486` as if it were local — the tunn
 - This server performs **on-chain writes** that cost a small transaction fee (default 0.0001 VRSC)
 - The server only connects to your local daemon (or the URL you configure) — no data is sent elsewhere
 - If connecting to a remote daemon, use an SSH tunnel rather than exposing the RPC port directly
-- Consider running on **testnet** first to verify your setup
 - The `sourceoffunds` parameter can be used to control which address pays fees
 
 ## License
