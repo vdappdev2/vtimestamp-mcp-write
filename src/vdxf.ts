@@ -18,7 +18,7 @@ import type {
 // VDXF Key Constants
 // ============================================================================
 
-/** DataDescriptor wrapper key (same for testnet and mainnet) */
+/** DataDescriptor wrapper key */
 const DATA_DESCRIPTOR_KEY = 'i4GC1YGEVD21afWudGoFJVdnfjJ5XWnCQv';
 
 interface VdxfKeys {
@@ -45,7 +45,7 @@ const MAINNET_VDXF: VdxfKeys = {
   },
 };
 
-export function getVdxfKeys(_network?: string): VdxfKeys {
+export function getVdxfKeys(): VdxfKeys {
   return MAINNET_VDXF;
 }
 

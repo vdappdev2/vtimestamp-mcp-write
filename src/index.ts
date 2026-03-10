@@ -37,7 +37,7 @@ try {
 
 const server = new McpServer({
   name: 'vtimestamp-mcp-write',
-  version: '1.1.1',
+  version: '1.1.2',
 });
 
 registerTools(server);

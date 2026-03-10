@@ -87,7 +87,7 @@ export function registerTools(server: McpServer): void {
         hash = sha256(text!);
       }
 
-      const keys = getVdxfKeys('mainnet');
+      const keys = getVdxfKeys();
 
       try {
         // Step 1: Verify identity exists and get name + parent
