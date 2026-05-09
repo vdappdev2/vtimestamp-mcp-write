@@ -9,17 +9,52 @@
 export interface DataDescriptor {
   version: number;
   flags: number;
-  objectdata: { message: string } | number | null;
+  // On-chain encrypted descriptors (flags:13/5/37) carry ciphertext as a hex string.
+  // Legacy plaintext descriptors (flags:0) carry { message: string } or a raw number.
+  objectdata: { message: string } | number | string | null;
   label?: string;
   mimetype?: string;
+  // Encryption fields, present when flags has the relevant bits set.
+  epk?: string;
+  ivk?: string;
+  salt?: string;
 }
 
 export interface DataDescriptorWrapper {
   [wrapperKey: string]: DataDescriptor;
 }
 
+/**
+ * `{data: {...}}` envelope shorthand inside contentmultimap. The daemon
+ * recognizes this and produces an encrypted DataDescriptor on-chain.
+ * See verusidx-documentation/docs/how-to/data/publish-encrypted-data-on-identity.md.
+ */
+export interface DataEnvelope {
+  data: {
+    message?: string;
+    messagehex?: string;
+    filename?: string;
+    encrypttoaddress?: string;
+    createmmr?: boolean;
+    mmrdata?: Array<{ message?: string; messagehex?: string; filename?: string }>;
+  };
+}
+
+export type ContentMultiMapValue = DataDescriptorWrapper | DataEnvelope;
+
 export interface ContentMultiMap {
-  [outerKey: string]: DataDescriptorWrapper[];
+  [outerKey: string]: ContentMultiMapValue[];
+}
+
+/**
+ * The decrypted form of a flags:13 entry, returned by `decryptdata`
+ * with `retrieve: true`. Plaintext bytes live as hex in `objectdata`.
+ */
+export interface DecryptedDataDescriptor {
+  version: number;
+  flags: number;
+  objectdata: string;
+  salt?: string;
 }
 
 export interface IdentityData {

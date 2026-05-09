@@ -134,6 +134,22 @@ Your Verus Daemon (verusd)
     └── Local (127.0.0.1) or remote (VPS)
 ```
 
+## On-chain storage shape
+
+As of **v1.2.0**, this server writes timestamps as **public-encrypted** entries under the VerusID's `contentmultimap`. Each timestamp produces a single entry under the `proof.basic` outer key (`iJvkQ3uTKmRoFiE3rtP8YJxryLBKu8enmX`) using the daemon's `{data: {...}}` envelope shorthand. The daemon expands that to an on-chain DataDescriptor with `flags: 13` (HAS_OBJECTDATA | ENCRYPTED | HAS_IVK) — ciphertext in `objectdata`, plus published `epk` and `ivk` fields.
+
+The metadata (sha256, title, description, filename, filesize) is JSON-stringified into a single message before encryption, so one decrypt call recovers all fields. Because the IVK is published on-chain (public-encrypted mode), **anyone** can decrypt these entries — no key sharing or wallet access is required for readers. See [vtimestamp-mcp](https://www.npmjs.com/package/vtimestamp-mcp) for the read side.
+
+**What this means for inspection:**
+
+- Inspecting the cmm via any read RPC (`getidentity`, `getidentityhistory`, `getidentitycontent`) returns the ciphertext descriptor, not readable strings.
+- Recovering the original fields requires a `decryptdata` call passing the descriptor + the originating txid + `retrieve: true`. The daemon stores ciphertext as an indirect reference back to the writing transaction — the txid is part of the decrypt input.
+- Verifying a hash against an identity does not require a wallet — only daemon RPC access to a node that has `decryptdata` whitelisted.
+
+**Legacy entries continue to work.** Timestamps written by `1.1.x` and earlier (plaintext per-field DataDescriptors with `flags: 0`) remain on-chain forever (cmm is append-only), and `vtimestamp-mcp@1.2.0+` reads both shapes transparently.
+
+**For background, see** [How to Publish Encrypted Data on an Identity](https://github.com/vdappdev2/verus-pbaas-docs/blob/main/docs/how-to/data/publish-encrypted-data-on-identity.md).
+
 ## Daemon Setup
 
 ### Local daemon

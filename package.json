@@ -1,11 +1,11 @@
 {
   "name": "vtimestamp-mcp-write",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "mcpName": "io.github.vdappdev2/vtimestamp-write",
   "description": "MCP server for creating vtimestamp proofs on the Verus blockchain via a local or remote daemon",
   "type": "module",
   "bin": {
-    "vtimestamp-mcp-write": "./build/index.js"
+    "vtimestamp-mcp-write": "build/index.js"
   },
   "files": [
     "build"
@@ -27,7 +27,7 @@
   "homepage": "https://vtimestamp.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vdappdev2/vtimestamp-mcp-write.git"
+    "url": "git+https://github.com/vdappdev2/vtimestamp-mcp-write.git"
   },
   "bugs": {
     "url": "https://github.com/vdappdev2/vtimestamp-mcp-write/issues"

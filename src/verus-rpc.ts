@@ -15,6 +15,8 @@ import type {
   GetIdentityResponse,
   IdentityHistoryResponse,
   ContentMultiMap,
+  DataDescriptor,
+  DecryptedDataDescriptor,
 } from './types.js';
 
 // ============================================================================
@@ -210,4 +212,19 @@ export async function updateIdentity(
   }
 
   return rpcCall<string>('updateidentity', params);
+}
+
+/**
+ * Decrypt an on-chain DataDescriptor produced by the `{data:{}}` envelope path.
+ * Pass the descriptor as it appears under getidentity, plus the txid that
+ * created the entry — `retrieve: true` follows the indirect reference back to
+ * the ciphertext stored in that transaction.
+ */
+export async function decryptData(
+  datadescriptor: DataDescriptor,
+  txid: string,
+): Promise<DecryptedDataDescriptor[]> {
+  return rpcCall<DecryptedDataDescriptor[]>('decryptdata', [
+    { datadescriptor, txid, retrieve: true },
+  ]);
 }

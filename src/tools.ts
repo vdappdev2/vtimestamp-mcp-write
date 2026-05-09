@@ -117,7 +117,7 @@ export function registerTools(server: McpServer): void {
         // Step 2: Check for duplicate hash
         try {
           const historyResponse = await getIdentityHistory(identity);
-          const existing = findTimestampByHash(historyResponse.history, hash, keys);
+          const existing = await findTimestampByHash(historyResponse.history, hash, keys);
           if (existing) {
             return {
               content: [
